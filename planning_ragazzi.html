@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Le Mie Faccende</title>
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+<style>
+  :root{--v:#e8729a;--l:#4fa8d8;--g:#5bbf6a;--bg:#fff8f4;--accent:#c0674a;--text:#3a2a24;--muted:#a89088;}
+  *{box-sizing:border-box;margin:0;padding:0;}
+  body{font-family:'Nunito',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;}
+  .login-screen{display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:100vh;padding:24px;gap:16px;}
+  .login-screen h1{font-size:1.6rem;font-weight:900;color:var(--accent);}
+  .login-screen p{font-size:0.85rem;color:var(--muted);text-align:center;}
+  .person-btns{display:flex;flex-direction:column;gap:12px;width:100%;max-width:280px;}
+  .person-btn{padding:16px;border-radius:16px;border:none;font-family:'Nunito',sans-serif;font-size:1rem;font-weight:800;color:white;cursor:pointer;display:flex;align-items:center;gap:12px;box-shadow:0 4px 12px rgba(0,0,0,0.12);}
+  .btn-v{background:linear-gradient(135deg,#e8729a,#d45580);}
+  .btn-l{background:linear-gradient(135deg,#4fa8d8,#2a7fb8);}
+  .btn-g{background:linear-gradient(135deg,#5bbf6a,#38a048);}
+  .btn-avatar{width:40px;height:40px;border-radius:50%;background:rgba(255,255,255,0.3);display:flex;align-items:center;justify-content:center;font-size:1.2rem;font-weight:900;}
+  .app-screen{display:none;}
+  .app-screen.active{display:block;}
+  .app-header{padding:16px 16px 12px;color:white;display:flex;align-items:center;gap:12px;}
+  .app-header .avatar{width:42px;height:42px;border-radius:50%;background:rgba(255,255,255,0.25);display:flex;align-items:center;justify-content:center;font-size:1.2rem;font-weight:900;color:white;}
+  .app-header h2{font-size:1.1rem;font-weight:900;}
+  .app-header p{font-size:0.75rem;opacity:0.85;}
+  .back-btn{margin-left:auto;background:rgba(255,255,255,0.2);border:none;color:white;font-family:'Nunito',sans-serif;font-size:0.75rem;font-weight:700;padding:6px 12px;border-radius:12px;cursor:pointer;}
+  .nav-days{display:flex;overflow-x:auto;gap:8px;padding:10px 14px;background:white;border-bottom:1px solid #f0e0d6;scrollbar-width:none;}
+  .nav-days::-webkit-scrollbar{display:none;}
+  .day-btn{flex-shrink:0;padding:6px 14px;border-radius:20px;border:2px solid #eee;background:white;font-family:'Nunito',sans-serif;font-size:0.78rem;font-weight:700;cursor:pointer;color:var(--muted);}
+  .day-btn.active{background:var(--accent);border-color:var(--accent);color:white;}
+  .day-btn.today{border-color:var(--accent);color:var(--accent);}
+  .progress-bar-wrap{padding:10px 14px 0;background:white;}
+  .progress-label{font-size:0.75rem;color:var(--muted);font-weight:600;margin-bottom:5px;display:flex;justify-content:space-between;}
+  .progress-track{background:#f0e0d6;border-radius:10px;height:8px;overflow:hidden;margin-bottom:12px;}
+  .progress-fill{height:100%;border-radius:10px;transition:width 0.4s ease;}
+  .sync-indicator{font-size:0.72rem;color:var(--muted);text-align:center;padding:6px;background:white;}
+  .sync-dot{display:inline-block;width:7px;height:7px;border-radius:50%;background:#4caf50;margin-right:4px;animation:pulse 2s infinite;}
+  @keyframes pulse{0%,100%{opacity:1}50%{opacity:0.3}}
+  .day-view{display:none;padding:14px;}
+  .day-view.active{display:block;}
+  .task-card{background:white;border-radius:16px;overflow:hidden;box-shadow:0 2px 8px rgba(0,0,0,0.06);margin-bottom:12px;margin-top:14px;}
+  .task-card-title{padding:10px 14px;font-size:0.8rem;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:0.5px;border-bottom:1px solid #f5ede8;}
+  .task-item{display:flex;align-items:center;gap:12px;padding:13px 14px;border-bottom:1px solid #f8f0ec;cursor:pointer;user-select:none;-webkit-tap-highlight-color:transparent;}
+  .task-item:last-child{border-bottom:none;}
+  .task-item:active{background:#fef0e8;}
+  .task-icon{font-size:1.2rem;}
+  .task-label{flex:1;font-size:0.88rem;font-weight:700;}
+  .task-sub{font-size:0.72rem;color:var(--muted);font-weight:500;}
+  .task-check{width:26px;height:26px;border-radius:50%;border:2.5px solid #ddd;display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:all 0.2s;}
+  .task-item.done .task-label{text-decoration:line-through;color:var(--muted);}
+  .task-item.done .task-check{border-color:#4caf50;background:#4caf50;}
+  .task-item.done .task-check::after{content:'✓';color:white;font-size:0.85rem;font-weight:900;}
+  .all-done-banner{background:linear-gradient(135deg,#5bbf6a,#38a048);color:white;text-align:center;padding:14px;border-radius:16px;margin:0 14px 14px;font-weight:800;font-size:0.95rem;display:none;}
+  .all-done-banner.show{display:block;}
+</style>
+</head>
+<body>
+
+<div class="login-screen" id="loginScreen">
+  <div style="font-size:3rem">🏠</div>
+  <h1>Faccende di Casa</h1>
+  <p>Chi sei?</p>
+  <div class="person-btns">
+    <button class="person-btn btn-v" id="btnValeria"><div class="btn-avatar">V</div><span>Valeria</span></button>
+    <button class="person-btn btn-l" id="btnLorenzo"><div class="btn-avatar">L</div><span>Lorenzo</span></button>
+    <button class="person-btn btn-g" id="btnGabriele"><div class="btn-avatar">G</div><span>Gabriele</span></button>
+  </div>
+</div>
+
+<div class="app-screen" id="appScreen">
+  <div id="appHeader" class="app-header"></div>
+  <div class="nav-days" id="navDays"></div>
+  <div class="progress-bar-wrap">
+    <div class="progress-label"><span>I miei compiti</span><span id="progressText">0/0</span></div>
+    <div class="progress-track"><div class="progress-fill" id="progressFill" style="width:0%"></div></div>
+  </div>
+  <div class="sync-indicator"><span class="sync-dot"></span>Sincronizzato con mamma e papà</div>
+  <div id="dayViews"></div>
+  <div class="all-done-banner" id="allDoneBanner">🎉 Tutti i compiti completati! Bravissimo/a!</div>
+</div>
+
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
+<script>
+const firebaseConfig={
+  apiKey:"AIzaSyAITfq0F4dV02UqOnYFYxYJ9E8Zqf8u8p4",
+  authDomain:"compiti-family.firebaseapp.com",
+  databaseURL:"https://compiti-family-default-rtdb.europe-west1.firebasedatabase.app",
+  projectId:"compiti-family",
+  storageBucket:"compiti-family.firebasestorage.app",
+  messagingSenderId:"19353578923",
+  appId:"1:19353578923:web:40f5b37f2ccd44eb96b6ee"
+};
+firebase.initializeApp(firebaseConfig);
+const db=firebase.database();
+
+const DAYS=['Lunedì','Martedì','Mercoledì','Giovedì','Venerdì','Sabato','Domenica'];
+const PEOPLE=[
+  {name:'Valeria',age:15,gradient:'linear-gradient(135deg,#e8729a,#d45580)'},
+  {name:'Lorenzo',age:13,gradient:'linear-gradient(135deg,#4fa8d8,#2a7fb8)'},
+  {name:'Gabriele',age:11,gradient:'linear-gradient(135deg,#5bbf6a,#38a048)'}
+];
+const SHOWER_ORDER=[[0,1,2],[1,2,0],[2,0,1],[0,1,2],[1,2,0],[2,0,1],[0,1,2]];
+const SHOWER_TIMES=['20:00','20:20','20:40'];
+const CAMERA_TURN=[0,1,2,0,1,2,1];
+const TAVOLA_TURN=[1,2,0,1,2,0,1];
+
+let currentPerson=null;
+let currentDay=(()=>{let d=new Date().getDay();return d===0?6:d-1;})();
+let unsubscribe=null;
+
+function getTasks(pi,di){
+  const sp=SHOWER_ORDER[di].indexOf(pi);
+  const t=[
+    {id:'letto',icon:'🛏',label:'Rifare il letto'},
+    {id:'doccia',icon:'🚿',label:'Doccia',sub:SHOWER_TIMES[sp]},
+    {id:'denti',icon:'🪥',label:'Lavarsi i denti'},
+  ];
+  if(CAMERA_TURN[di]===pi)t.push({id:'camera',icon:'🧹',label:'Riordinare la camera'});
+  if(TAVOLA_TURN[di]===pi)t.push({id:'tavola',icon:'🍽',label:'Apparecchiare la tavola'});
+  return t;
+}
+
+function doLogin(pi){
+  currentPerson=pi;
+  document.getElementById('loginScreen').style.display='none';
+  document.getElementById('appScreen').classList.add('active');
+  const p=PEOPLE[pi];
+  document.getElementById('appHeader').style.background=p.gradient;
+  document.getElementById('appHeader').innerHTML=`
+    <div class="avatar">${p.name[0]}</div>
+    <div><h2>Ciao ${p.name}! 👋</h2><p>${p.age} anni</p></div>
+    <button class="back-btn" id="backBtn">Cambia</button>`;
+  document.getElementById('backBtn').onclick=doLogout;
+  document.getElementById('progressFill').style.background=p.gradient;
+  renderApp();
+}
+
+function doLogout(){
+  if(unsubscribe){unsubscribe();unsubscribe=null;}
+  currentPerson=null;
+  document.getElementById('loginScreen').style.display='flex';
+  document.getElementById('appScreen').classList.remove('active');
+}
+
+document.getElementById('btnValeria').onclick=()=>doLogin(0);
+document.getElementById('btnLorenzo').onclick=()=>doLogin(1);
+document.getElementById('btnGabriele').onclick=()=>doLogin(2);
+
+function renderApp(){
+  const nav=document.getElementById('navDays');
+  const views=document.getElementById('dayViews');
+  nav.innerHTML='';views.innerHTML='';
+  const todayIdx=(()=>{let d=new Date().getDay();return d===0?6:d-1;})();
+  DAYS.forEach((day,di)=>{
+    const btn=document.createElement('button');
+    btn.className='day-btn'+(di===currentDay?' active':'')+(di===todayIdx&&di!==currentDay?' today':'');
+    btn.textContent=day.slice(0,3);
+    btn.onclick=()=>{currentDay=di;renderApp();};
+    nav.appendChild(btn);
+    const view=document.createElement('div');
+    view.className='day-view'+(di===currentDay?' active':'');
+    views.appendChild(view);
+  });
+  listenDay();
+}
+
+function listenDay(){
+  if(unsubscribe){unsubscribe();unsubscribe=null;}
+  const pi=currentPerson;
+  const ref=db.ref(`tasks/d${currentDay}/p${pi}`);
+  unsubscribe=ref.on('value',(snap)=>{
+    const data=snap.val()||{};
+    renderDayView(pi,currentDay,data);
+    updateProgress(pi,currentDay,data);
+  });
+}
+
+function renderDayView(pi,di,data){
+  const views=document.getElementById('dayViews');
+  const view=views.children[di];
+  if(!view)return;
+  const tasks=getTasks(pi,di);
+  view.innerHTML=`<div class="task-card">
+    <div class="task-card-title">I tuoi compiti</div>
+    ${tasks.map(t=>`
+      <div class="task-item${data[t.id]===true?' done':''}" data-tid="${t.id}">
+        <span class="task-icon">${t.icon}</span>
+        <div class="task-label">${t.label}${t.sub?`<br><span class="task-sub">${t.sub}</span>`:''}</div>
+        <div class="task-check"></div>
+      </div>`).join('')}
+  </div>`;
+  view.querySelectorAll('.task-item').forEach(el=>{
+    el.onclick=()=>toggleTask(pi,di,el.dataset.tid,!el.classList.contains('done'));
+  });
+}
+
+function toggleTask(pi,di,tid,done){
+  db.ref(`tasks/d${di}/p${pi}/${tid}`).set(done?true:null);
+}
+
+function updateProgress(pi,di,data){
+  const tasks=getTasks(pi,di);
+  const done=tasks.filter(t=>data[t.id]===true).length;
+  const total=tasks.length;
+  document.getElementById('progressText').textContent=`${done}/${total}`;
+  document.getElementById('progressFill').style.width=total?(done/total*100)+'%':'0%';
+  document.getElementById('allDoneBanner').className='all-done-banner'+(done===total&&total>0?' show':'');
+}
+</script>
+</body>
+</html>
